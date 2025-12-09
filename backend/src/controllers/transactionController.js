@@ -193,11 +193,17 @@ const getTransactions = async (req, res) => {
           hasPrevPage: false
         },
         filters: {
-          search: search || null,
-          region: region ? region.split(',') : [],
-          category: category ? category.split(',') : [],
-          status: status ? status.split(',') : [],
-          paymentMethod: paymentMethod ? paymentMethod.split(',') : []
+          search: req.query.search || null,
+          region: req.query.region ? req.query.region.split(',') : [],
+          category: req.query.category ? req.query.category.split(',') : [],
+          status: req.query.status ? req.query.status.split(',') : [],
+          paymentMethod: req.query.paymentMethod ? req.query.paymentMethod.split(',') : [],
+          gender: req.query.gender ? req.query.gender.split(',') : [],
+          tags: req.query.tags ? req.query.tags.split(',') : [],
+          ageMin: req.query.ageMin || null,
+          ageMax: req.query.ageMax || null,
+          startDate: req.query.startDate || null,
+          endDate: req.query.endDate || null
         }
       });
     }
@@ -221,11 +227,17 @@ const getTransactions = async (req, res) => {
         hasPrevPage: pageNumber > 1
       },
       filters: {
-        search: search || null,
-        region: region ? region.split(',') : [],
-        category: category ? category.split(',') : [],
-        status: status ? status.split(',') : [],
-        paymentMethod: paymentMethod ? paymentMethod.split(',') : []
+        search: req.query.search || null,
+        region: req.query.region ? req.query.region.split(',') : [],
+        category: req.query.category ? req.query.category.split(',') : [],
+        status: req.query.status ? req.query.status.split(',') : [],
+        paymentMethod: req.query.paymentMethod ? req.query.paymentMethod.split(',') : [],
+        gender: req.query.gender ? req.query.gender.split(',') : [],
+        tags: req.query.tags ? req.query.tags.split(',') : [],
+        ageMin: req.query.ageMin || null,
+        ageMax: req.query.ageMax || null,
+        startDate: req.query.startDate || null,
+        endDate: req.query.endDate || null
       }
     });
 

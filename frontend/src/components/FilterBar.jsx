@@ -70,6 +70,86 @@ const FilterDropdown = ({ label, options, selected, onChange, placeholder }) => 
   );
 };
 
+// Date Range Picker Component
+const DateRangePicker = ({ dateRange, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const hasDateFilter = dateRange?.start || dateRange?.end;
+
+  const handleClear = () => {
+    onChange({ start: '', end: '' });
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-3 py-2 text-sm border rounded-lg transition-colors ${
+          hasDateFilter
+            ? 'bg-pink-50 border-pink-200 text-pink-700'
+            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+        }`}
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>
+          {hasDateFilter
+            ? `${dateRange.start || '...'} - ${dateRange.end || '...'}`
+            : 'Date Range'}
+        </span>
+        <svg className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-3">
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">Start Date</label>
+              <input
+                type="date"
+                value={dateRange?.start || ''}
+                onChange={(e) => onChange({ ...dateRange, start: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">End Date</label>
+              <input
+                type="date"
+                value={dateRange?.end || ''}
+                onChange={(e) => onChange({ ...dateRange, end: e.target.value })}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
+              />
+            </div>
+            {hasDateFilter && (
+              <button
+                onClick={handleClear}
+                className="w-full px-3 py-1.5 text-xs text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Clear dates
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FilterBar = ({ filters, filterOptions, onFilterChange, onClear, sortBy, sortOrder, onSortChange }) => {
   const genderOptions = ['Male', 'Female'];
   const ageRangeOptions = ['18-25', '26-35', '36-45', '46-55', '56-65'];
@@ -131,13 +211,11 @@ const FilterBar = ({ filters, filterOptions, onFilterChange, onClear, sortBy, so
           placeholder="All Methods"
         />
 
-        {/* Date Filter */}
-        <button className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50">
-          <span>Date</span>
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+        {/* Date Range Picker */}
+        <DateRangePicker
+          dateRange={filters.dateRange}
+          onChange={(val) => onFilterChange('dateRange', val)}
+        />
 
         {/* Spacer */}
         <div className="flex-1" />
