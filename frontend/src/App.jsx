@@ -5,7 +5,7 @@ import FilterBar from './components/FilterBar';
 import SummaryCards from './components/SummaryCards';
 import TransactionTable from './components/TransactionTable';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function App() {
   // Data state
