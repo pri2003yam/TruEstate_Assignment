@@ -6,35 +6,19 @@ A full-stack MERN application for managing and visualizing transaction data with
 
 ## 📋 Overview
 
-This project is a **Transaction Management Dashboard** built as part of a coding assignment. It demonstrates a complete data pipeline from CSV import to a fully interactive web interface.
+This project is a **Transaction Management Dashboard** built as part of a coding assignment. It demonstrates a complete data pipeline from CSV import to a fully interactive web interface with 500,000+ transaction records.
 
 ### Key Features
 
 | Feature | Description |
 |---------|-------------|
-| **Multi-Select Filtering** | Filter by multiple Regions, Categories, Statuses simultaneously |
-| **Fuzzy Search** | Search by Customer Name or Transaction ID with regex matching |
-| **Smart Sorting** | Sort by any column (Date, Amount, Name, etc.) in asc/desc order |
-| **Pagination** | Navigate through large datasets with 10 items per page |
+| **Multi-Select Filtering** | Filter by Region, Category, Status, Payment Method, Gender, Age Range, Tags, Date Range |
+| **Fuzzy Search** | Search by Customer Name, Product Name, or Transaction ID with regex matching |
+| **Smart Sorting** | Click column headers or use dropdown to sort by any field (asc/desc) |
+| **Pagination** | Navigate with First/Prev/Next/Last buttons and numbered pages |
+| **Real-time Summary** | Aggregated totals (Units, Amount, Discount) from ALL matching records |
 | **Dark Sidebar** | Professional dashboard UI with pink accent theme |
-| **Data Seeding** | One-time CSV import script to populate MongoDB |
-
-### Screenshots
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ [Dark Sidebar]  │  Dashboard                                    │
-│                 │  ┌─────────────────────────────────────────┐  │
-│  ● Dashboard    │  │ Search... │ Region ▼ │ Category ▼ │     │  │
-│  ○ Nexus        │  └─────────────────────────────────────────┘  │
-│  ○ Services     │                                               │
-│  ○ Invoices     │  ┌─────────────────────────────────────────┐  │
-│                 │  │ ID │ Date │ Customer │ Amount │ Status  │  │
-│                 │  ├─────────────────────────────────────────┤  │
-│                 │  │    │      │          │        │         │  │
-│                 │  └─────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
-```
+| **Date Range Picker** | Filter transactions by custom date range |
 
 ---
 
@@ -46,9 +30,9 @@ This project is a **Transaction Management Dashboard** built as part of a coding
 | **Styling** | Tailwind CSS 3 | Utility-first CSS |
 | **HTTP Client** | Axios | API communication |
 | **Backend** | Node.js + Express | RESTful API server |
-| **Database** | MongoDB Atlas | Cloud NoSQL database |
+| **Database** | MongoDB Atlas | Cloud NoSQL database (500K records) |
 | **ODM** | Mongoose | Schema validation & queries |
-| **Data Import** | csv-parser | CSV to MongoDB seeding |
+| **Data Import** | csv-parser | CSV to MongoDB batch seeding |
 
 ---
 
@@ -63,7 +47,7 @@ This project is a **Transaction Management Dashboard** built as part of a coding
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/pri2003yam/TruEstate_Assignment.git
 cd TruEstate_Assignment
 ```
 
@@ -74,7 +58,7 @@ cd backend
 npm install
 ```
 
-Create a `.env` file:
+Create a `.env` file in the `backend` folder:
 
 ```env
 PORT=5000
@@ -83,20 +67,13 @@ MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
 
 ### 3. Seed the Database (One-Time)
 
-Place your `data.csv` file in the `backend/` folder, then run:
+Place your CSV file (named `truestate_assignment_dataset.csv`) in the `backend/` folder, then run:
 
 ```bash
 npm run seed
 ```
 
-Expected output:
-```
-🌱 Starting Database Seeder...
-✅ MongoDB connected successfully
-📄 Parsed 500 rows from CSV
-✅ Successfully inserted 500 transactions
-🎉 Database seeding completed successfully!
-```
+> **Note:** The seeder uses batch inserts (5000 records/batch) and limits to 500,000 records to stay within MongoDB Atlas free tier limits.
 
 ### 4. Start the Backend Server
 
@@ -116,10 +93,6 @@ npm run dev
 
 Frontend runs at: `http://localhost:5173`
 
-### 6. Open the Application
-
-Navigate to `http://localhost:5173` in your browser.
-
 ---
 
 ## 📡 API Documentation
@@ -135,41 +108,42 @@ http://localhost:5000/api
 
 Fetch transactions with filters, search, sorting, and pagination.
 
-**Query Parameters:**
-
 | Parameter | Type | Example | Description |
 |-----------|------|---------|-------------|
-| `search` | string | `John` | Fuzzy search on CustomerName & TransactionID |
+| `search` | string | `John` | Fuzzy search on CustomerName, ProductName & TransactionID |
 | `region` | string | `North,South` | Comma-separated regions (multi-select) |
 | `category` | string | `Electronics,Clothing` | Comma-separated categories |
-| `status` | string | `Completed,Pending` | Comma-separated statuses |
-| `paymentMethod` | string | `Credit Card,PayPal` | Comma-separated payment methods |
-| `sortBy` | string | `Amount` | Field to sort by |
+| `status` | string | `Completed,Pending` | Comma-separated order statuses |
+| `paymentMethod` | string | `Credit Card,UPI` | Comma-separated payment methods |
+| `gender` | string | `Male,Female` | Comma-separated genders |
+| `ageMin` | number | `18` | Minimum age |
+| `ageMax` | number | `65` | Maximum age |
+| `tags` | string | `organic,skincare` | Comma-separated tags (partial match) |
+| `startDate` | string | `2024-01-01` | Start date (YYYY-MM-DD) |
+| `endDate` | string | `2024-12-31` | End date (YYYY-MM-DD) |
+| `sortBy` | string | `FinalAmount` | Field to sort by |
 | `sortOrder` | string | `desc` | Sort direction (asc/desc) |
 | `page` | number | `1` | Page number |
-| `limit` | number | `10` | Items per page (max: 100) |
+| `limit` | number | `20` | Items per page (max: 100) |
 
 **Example Request:**
 ```
-GET /api/transactions?region=North,South&category=Electronics&sortBy=Amount&sortOrder=desc&page=1
+GET /api/transactions?region=North,South&category=Electronics&sortBy=FinalAmount&sortOrder=desc&page=1
 ```
+
+#### `GET /transactions/summary`
+
+Get aggregated summary of ALL matching transactions (same filter params as above).
 
 **Response:**
 ```json
 {
   "success": true,
-  "data": [...],
-  "pagination": {
-    "totalDocuments": 150,
-    "totalPages": 15,
-    "currentPage": 1,
-    "limit": 10,
-    "hasNextPage": true,
-    "hasPrevPage": false
-  },
-  "filters": {
-    "region": ["North", "South"],
-    "category": ["Electronics"]
+  "summary": {
+    "totalUnits": 1250000,
+    "totalAmount": 45000000,
+    "totalDiscount": 5000000,
+    "totalRecords": 500000
   }
 }
 ```
@@ -184,9 +158,10 @@ Get unique values for filter dropdowns.
   "success": true,
   "filters": {
     "regions": ["East", "North", "South", "West"],
-    "categories": ["Clothing", "Electronics", "Food"],
+    "categories": ["Clothing", "Electronics", "Food", "..."],
     "statuses": ["Cancelled", "Completed", "Pending"],
-    "paymentMethods": ["Credit Card", "Debit Card", "PayPal"]
+    "paymentMethods": ["Credit Card", "Debit Card", "UPI", "..."],
+    "tags": ["electronics", "fashion", "organic", "..."]
   }
 }
 ```
@@ -200,29 +175,25 @@ TruEstate_Assignment/
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/
-│   │   │   └── transactionController.js  # API logic
+│   │   │   └── transactionController.js  # API logic with filters
 │   │   ├── models/
-│   │   │   └── Transaction.js            # Mongoose schema
+│   │   │   └── Transaction.js            # Mongoose schema (26 fields)
 │   │   ├── routes/
 │   │   │   └── transactionRoutes.js      # Route definitions
-│   │   ├── services/                      # Business logic
-│   │   └── utils/                         # Helper functions
+│   │   ├── services/
+│   │   └── utils/
 │   ├── index.js                           # Server entry point
-│   ├── seed.js                            # CSV import script
-│   ├── package.json
-│   └── .env
+│   ├── seed.js                            # Batch CSV import script
+│   └── package.json
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Layout.jsx                 # Main layout
-│   │   │   ├── Sidebar.jsx                # Dark navigation
-│   │   │   ├── MultiSelect.jsx            # Filter dropdowns
-│   │   │   └── TransactionTable.jsx       # Data table
-│   │   ├── App.jsx                        # Main app component
-│   │   ├── main.jsx                       # React entry
+│   │   │   ├── Sidebar.jsx               # Dark navigation sidebar
+│   │   │   ├── FilterBar.jsx             # Multi-select filter dropdowns
+│   │   │   ├── SummaryCards.jsx          # Aggregated totals display
+│   │   │   └── TransactionTable.jsx      # Data table with pagination
+│   │   ├── App.jsx                        # Main app with state management
 │   │   └── index.css                      # Tailwind styles
-│   ├── vercel.json                        # Deployment config
-│   ├── tailwind.config.js
 │   └── package.json
 ├── docs/
 │   ├── architecture.md                    # System architecture
@@ -232,32 +203,43 @@ TruEstate_Assignment/
 
 ---
 
-## 🌐 Deployment
+## 🔧 Database Schema
 
-### Backend → Render.com
+The Transaction model includes 26 fields matching the CSV dataset:
 
-1. Create new Web Service on Render
-2. Set Root Directory: `backend`
-3. Build Command: `npm install`
-4. Start Command: `npm start`
-5. Add Environment Variable: `MONGODB_URI`
-
-### Frontend → Vercel
-
-1. Import project on Vercel
-2. Set Root Directory: `frontend`
-3. Deploy automatically
-
-See [docs/deployment.md](docs/deployment.md) for detailed instructions.
-
----
-
-## 📄 License
-
-ISC
+| Field | Type | Description |
+|-------|------|-------------|
+| TransactionID | Number | Unique transaction identifier |
+| Date | Date | Transaction date |
+| CustomerID | String | Customer identifier |
+| CustomerName | String | Customer full name |
+| PhoneNumber | String | Contact number |
+| Gender | String | Male/Female |
+| Age | Number | Customer age |
+| CustomerRegion | String | Geographic region |
+| CustomerType | String | Customer classification |
+| ProductID | String | Product identifier |
+| ProductName | String | Product name |
+| Brand | String | Product brand |
+| ProductCategory | String | Product category |
+| Tags | String | Product tags |
+| Quantity | Number | Units purchased |
+| PricePerUnit | Number | Unit price |
+| DiscountPercentage | Number | Discount applied |
+| TotalAmount | Number | Pre-discount total |
+| FinalAmount | Number | Post-discount total |
+| PaymentMethod | String | Payment type |
+| OrderStatus | String | Order status |
+| DeliveryType | String | Delivery method |
+| StoreID | String | Store identifier |
+| StoreLocation | String | Store location |
+| SalespersonID | String | Salesperson ID |
+| EmployeeName | String | Employee name |
 
 ---
 
 ## 👤 Author
+
+**Priyam Raj**
 
 Built for TruEstate Coding Assignment
